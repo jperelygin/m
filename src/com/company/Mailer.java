@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.Properties;
 
+import java.util.logging.*;
+
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
@@ -12,21 +14,46 @@ import javax.mail.internet.MimeMessage;
 
 public class Mailer {
 
+    private static final Logger LOGGER = Logger.getLogger(Mailer.class.getName());
+    private Handler fileHandler = null;
+    private Formatter formatter = null;
+
     private String login;
     private String password;
     private String host;
     private int startSslPort;
     private int sslTlsPort;
 
+
     Mailer(String propertiesFilePath) throws IOException {
+
+        // Logger preparations in constructor
+        fileHandler = new FileHandler("./mailer.log");
+        formatter = new SimpleFormatter();
+        fileHandler.setFormatter(formatter);
+        LOGGER.addHandler(fileHandler);
+        LOGGER.setLevel(Level.OFF);         // Both can be turned on \
+        fileHandler.setLevel(Level.OFF);    // by using @turnAllLogger() function
+
         Properties prop = new Properties();
         FileInputStream inputStream = new FileInputStream(propertiesFilePath);
         prop.load(inputStream);
+
         this.login = prop.getProperty("Login");
         this.password = prop.getProperty("Password");
         this.host = prop.getProperty("Host");
         this.startSslPort = Integer.parseInt(prop.getProperty("StartSslPort"));
         this.sslTlsPort = Integer.parseInt(prop.getProperty("SslTlsPort"));
+    }
+
+    public void turnAllLogger(){
+        LOGGER.setLevel(Level.ALL);
+        this.fileHandler.setLevel(Level.ALL);
+    }
+
+    public void turnInfoLogger(){
+        LOGGER.setLevel(Level.INFO);
+        this.fileHandler.setLevel(Level.INFO);
     }
 
     @Override
@@ -43,10 +70,18 @@ public class Mailer {
         Properties prop = new Properties();
         String password = this.password;
         String host = this.host;
+
         prop.put("mail.smtp.host", this.host);
+
         prop.put("mail.smtp.port", String.valueOf(this.startSslPort));
+        LOGGER.info("Sslport : " + this.startSslPort);
+
         prop.put("mail.smtp.auth", "true");
+
         prop.put("mail.smtp.starttls.enable", "true");
+
+        LOGGER.info( "Properties:");
+        prop.forEach((k,v) -> LOGGER.info(k + " : " + v));
 
         Authenticator auth = new Authenticator() {
             @Override
@@ -62,18 +97,25 @@ public class Mailer {
             sendEmail(session, mail);
         } catch (Exception e){
             e.printStackTrace();
+            LOGGER.info("Exception:" + e);
         }
 
     }
 
 
     public void sendEmailSSL(Email mail){
-        System.out.println("-- preparing ssl propeties");
+
+        LOGGER.info("-- preparing ssl propeties");
         Properties prop = new Properties();
         String password = this.password;
         String host = this.host;
+
         prop.put("mail.smtp.host", this.host);
+        LOGGER.info( "Host : " + this.host + "\t" + this.host.getClass().getName());
+
         prop.put("mail.smtp.socketFactory.port", String.valueOf(this.sslTlsPort));
+        LOGGER.info("Port : " + this.sslTlsPort);
+
         prop.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
         prop.put("mail.smtp.auth", "true");
         prop.put("mail.smtp.port", String.valueOf(this.sslTlsPort));
@@ -85,14 +127,18 @@ public class Mailer {
             }
         };
 
+        LOGGER.config( "Properties:");
+        prop.forEach((k,v) -> LOGGER.config(k + " : " + v));
+
         Session session = Session.getInstance(prop, auth);
 
         try{
-            System.out.println("-- sending email");
+            LOGGER.info("-- sending email");
             sendEmail(session, mail);
-            System.out.println("-- email sent");
+            LOGGER.info("-- email sent!");
         } catch (Exception e){
             e.printStackTrace();
+            LOGGER.warning("Exception: " + e);
         }
     }
 

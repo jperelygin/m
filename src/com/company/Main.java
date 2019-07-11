@@ -4,9 +4,7 @@ package com.company;
 public class Main {
 
     public static void main(String[] args) {
-        //test_makeEmail();
-        //test_Mailer_readProps();
-        test_send_email();
+        readArg(args[0]);
     }
 
     public static void test_makeEmail(){
@@ -38,9 +36,31 @@ public class Main {
         try {
             Mailer mailer = new Mailer("/Users/ivanperelygin/Desktop/JavaPractice/m/mailer_yandex.properties");
             System.out.println(mailer.toString());
+            //mailer.turnAllLogger();
+            mailer.turnInfoLogger();
             mailer.sendEmailSSL(mail);
         } catch (Exception e){
             e.printStackTrace();
         }
+    }
+
+    public static void readArg(String arg){
+        switch (arg){
+            case "-h":
+                printHelp();
+                break;
+            case "-t":
+                test_send_email();
+                break;
+            default:
+                printHelp();
+                break;
+        }
+    }
+
+    public static void printHelp(){
+        System.out.println("-- Help for \"m\"");
+        System.out.println("-- use argument \"-t\" to send test mail");
+        System.out.println("-- use argument\"-h\" to see this help message");
     }
 }
