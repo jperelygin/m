@@ -1,5 +1,3 @@
-package ru.jperelygin;
-
 public class Email {
 
     private String from;

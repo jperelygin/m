@@ -1,5 +1,3 @@
-package ru.jperelygin;
-
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
@@ -179,7 +177,7 @@ public class Mailer {
             System.out.println("Number of mails : " + folder.getMessageCount());
             LOGGER.info("Number of mails : " + folder.getMessageCount());
 
-            int numberOfMessagesForView = folder.getMessageCount() + 1; // because they start indexing from 1
+            int numberOfMessagesForView = folder.getMessageCount() + 1; // "+1" because they start indexing from 1
             if (folder.getMessageCount() > 11) {
                 numberOfMessagesForView = 11;
                 LOGGER.info("Number of messages to view : " + numberOfMessagesForView);
@@ -194,9 +192,11 @@ public class Mailer {
     }
 
     private void prettyPrintMail(Message message) throws MessagingException{
-        System.out.println(String.format("%5s", String.valueOf(message.getMessageNumber())) + "\t" +
+        String m = String.format("%5s", String.valueOf(message.getMessageNumber())) + "\t" +
                 String.format("%15s", message.getReceivedDate().toString()) + "\t" +
                 String.format("%15s", message.getFrom()) + "\t" +
-                String.format("%20s", message.getSubject()));
+                String.format("%20s", message.getSubject());
+        System.out.println(m);
+        LOGGER.fine(message.toString()); // just logging fact of getting message
     }
 }

@@ -1,5 +1,3 @@
-package ru.jperelygin;
-
 import java.util.Scanner;
 
 public class MailMaker {
