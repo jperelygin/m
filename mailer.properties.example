@@ -1,5 +1,7 @@
-Login=login@domain.dmn
-Password=Password
-Host=smtp.domain.dmn
-StartSslPort=587
-SslTlsPort=465
+Login           = login@domain.dmn
+Password        = Password
+SmtpHost        = smtp.domain.dmn
+ImapHost        = imap.domain.dmn
+StartSslPort    = 587
+SslTlsPort      = 465
+ImapPort        = 993

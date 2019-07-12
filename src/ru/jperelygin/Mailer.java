@@ -19,9 +19,11 @@ public class Mailer {
 
     private String login;
     private String password;
-    private String host;
+    private String smtpHost;
+    private String imapHost;
     private int startSslPort;
     private int sslTlsPort;
+    private int imapPort;
 
 
     Mailer(String propertiesFilePath) throws IOException {
@@ -34,9 +36,11 @@ public class Mailer {
 
         this.login = prop.getProperty("Login");
         this.password = prop.getProperty("Password");
-        this.host = prop.getProperty("Host");
+        this.smtpHost = prop.getProperty("SmtpHost");
+        this.imapHost = prop.getProperty("ImapHost");
         this.startSslPort = Integer.parseInt(prop.getProperty("StartSslPort"));
         this.sslTlsPort = Integer.parseInt(prop.getProperty("SslTlsPort"));
+        this.imapPort = Integer.parseInt(prop.getProperty("ImapPort"));
     }
 
     private static void readLoggerParams(){
@@ -51,7 +55,7 @@ public class Mailer {
     public String toString(){
         return "Login:\t\t\t" + this.login + "\n" +
                 "Password:\t\t" + "*".repeat(this.password.length()) + "\n" +
-                "Host:\t\t\t" + this.host + "\n" +
+                "Host:\t\t\t" + this.smtpHost + "\n" +
                 "StartSslPort:\t" + this.startSslPort + "\n" +
                 "SslTlsPort:\t\t" + this.sslTlsPort + "\n";
     }
@@ -63,8 +67,8 @@ public class Mailer {
     public void sendEmailViaSMTPwithTLS(Email mail){
         Properties prop = new Properties();
 
-        prop.put("mail.smtp.host", this.host);
-        LOGGER.info("Host : " + this.host);
+        prop.put("mail.smtp.host", this.smtpHost);
+        LOGGER.info("Host : " + this.smtpHost);
         prop.put("mail.smtp.port", String.valueOf(this.startSslPort));
         LOGGER.info("Sslport : " + this.startSslPort);
         prop.put("mail.smtp.auth", "true");
@@ -88,8 +92,8 @@ public class Mailer {
     public void sendEmailSSL(Email mail){
         Properties prop = new Properties();
 
-        prop.put("mail.smtp.host", this.host);
-        LOGGER.info( "Host : " + this.host);
+        prop.put("mail.smtp.host", this.smtpHost);
+        LOGGER.info( "Host : " + this.smtpHost);
         prop.put("mail.smtp.socketFactory.port", String.valueOf(this.sslTlsPort));
         LOGGER.info("Port : " + this.sslTlsPort);
         prop.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
@@ -144,5 +148,44 @@ public class Mailer {
         msg.setSentDate(new Date());
 
         Transport.send(msg);
+    }
+
+    public void getInbox(){
+        Properties prop = new Properties();
+
+        prop.setProperty("mail.imap.ssl.enable", "true");
+        prop.setProperty("mail.store.protocol", "imaps");
+        prop.setProperty("mail.imap.port", String.valueOf(this.imapPort));
+
+        Authenticator auth = getAuthenticator();
+
+        Session session = Session.getInstance(prop, auth);
+
+        try{
+            Store store = session.getStore();
+            store.connect(this.imapHost, this.login, this.password);
+
+            Folder inbox = store.getFolder("INBOX");
+            inbox.open(Folder.READ_ONLY);
+
+            System.out.println("Number of mails : " + inbox.getMessageCount());
+            LOGGER.info("Number of mails : " + inbox.getMessageCount());
+
+            int numberOfMessagesForView = inbox.getMessageCount() + 1; // because they start indexing with 1
+            if (inbox.getMessageCount() > 11){
+                numberOfMessagesForView = 11;
+                LOGGER.info("Number of messages to view : " + numberOfMessagesForView);
+            }
+            for (int i = 1 ; i < numberOfMessagesForView ; i++){
+                Message message = inbox.getMessage(i);
+                System.out.println(String.format("%5s", String.valueOf(message.getMessageNumber())) + "\t" +
+                        String.format("%15s", message.getReceivedDate().toString()) + "\t" +
+                        String.format("%15s", message.getFrom()) + "\t" +
+                        String.format("%20s", message.getSubject()));
+            }
+
+        } catch (Exception e){
+            LOGGER.warning(e.toString());
+        }
     }
 }

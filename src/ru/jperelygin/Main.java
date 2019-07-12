@@ -51,6 +51,15 @@ public class Main {
         }
     }
 
+    private static void showInbox(){
+        try {
+            Mailer mailer = new Mailer("./mailer.properties");
+            mailer.getInbox();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
     private static void readArg(String arg){
         switch (arg){
             case "-h":
@@ -62,6 +71,9 @@ public class Main {
             case "-s":
                 makeMail();
                 break;
+            case "-i":
+                showInbox();
+                break;
             default:
                 printHelp();
                 break;
@@ -70,6 +82,7 @@ public class Main {
 
     private static void printHelp(){
         System.out.println("-- Help for \"m\"");
+        System.out.println("-- use argument \"-s\" to create and send mail");
         System.out.println("-- use argument \"-t\" to send test mail");
         System.out.println("-- use argument\"-h\" to see this help message");
     }
