@@ -1,4 +1,4 @@
-package com.company;
+package ru.jperelygin;
 
 public class Email {
 

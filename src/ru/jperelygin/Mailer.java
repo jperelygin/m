@@ -1,4 +1,4 @@
-package com.company;
+package ru.jperelygin;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -50,10 +50,14 @@ public class Mailer {
     @Override
     public String toString(){
         return "Login:\t\t\t" + this.login + "\n" +
-                "Password:\t\t" + this.password + "\n" +
+                "Password:\t\t" + "*".repeat(this.password.length()) + "\n" +
                 "Host:\t\t\t" + this.host + "\n" +
                 "StartSslPort:\t" + this.startSslPort + "\n" +
                 "SslTlsPort:\t\t" + this.sslTlsPort + "\n";
+    }
+
+    public String getSender(){
+        return this.login;
     }
 
     public void sendEmailViaSMTPwithTLS(Email mail){
@@ -85,7 +89,7 @@ public class Mailer {
         Properties prop = new Properties();
 
         prop.put("mail.smtp.host", this.host);
-        LOGGER.info( "Host : " + this.host + "\t" + this.host.getClass().getName());
+        LOGGER.info( "Host : " + this.host);
         prop.put("mail.smtp.socketFactory.port", String.valueOf(this.sslTlsPort));
         LOGGER.info("Port : " + this.sslTlsPort);
         prop.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
@@ -113,13 +117,13 @@ public class Mailer {
     }
 
     private Authenticator getAuthenticator(){
-        this.host = host;
-        this.password = password;
         Authenticator auth = new Authenticator() {
             @Override
             protected PasswordAuthentication getPasswordAuthentication() {
-                PasswordAuthentication pwAuth = new PasswordAuthentication(host, password);
-                LOGGER.info(pwAuth.toString());
+                PasswordAuthentication pwAuth = new PasswordAuthentication(login, password);
+                LOGGER.config(pwAuth.toString());
+                LOGGER.config(pwAuth.getUserName());
+                LOGGER.config(pwAuth.getPassword());
                 return pwAuth;
             }
         };
@@ -140,6 +144,5 @@ public class Mailer {
         msg.setSentDate(new Date());
 
         Transport.send(msg);
-        System.out.println("-- email sent");
     }
 }

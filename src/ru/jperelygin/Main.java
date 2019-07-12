@@ -1,4 +1,4 @@
-package com.company;
+package ru.jperelygin;
 
 
 public class Main {
@@ -29,13 +29,22 @@ public class Main {
     private static void test_send_email(){
         Email mail = new Email();
         mail.setTo("jperelygin@gmail.com");
-        mail.setFrom("saint@horsefucker.org");
         mail.setTitle("Test title");
         mail.setBody("Big body\nBIGGEST BODY!\n(not so big...)\n");
         System.out.println(mail.toString());
-        try {
-            Mailer mailer = new Mailer("/Users/ivanperelygin/Desktop/JavaPractice/m/mailer_yandex.properties");
-            System.out.println(mailer.toString());
+        send(mail);
+    }
+
+    private static void makeMail(){
+        MailMaker mm = new MailMaker();
+        Email newEmail = mm.make();
+        send(newEmail);
+    }
+
+    private static void send(Email mail){
+        try{
+            Mailer mailer = new Mailer("./mailer.properties");
+            mail.setFrom(mailer.getSender());
             mailer.sendEmailSSL(mail);
         } catch (Exception e){
             e.printStackTrace();
@@ -49,6 +58,9 @@ public class Main {
                 break;
             case "-t":
                 test_send_email();
+                break;
+            case "-s":
+                makeMail();
                 break;
             default:
                 printHelp();
