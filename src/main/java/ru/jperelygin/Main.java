@@ -7,25 +7,6 @@ public class Main {
         readArg(args[0]);
     }
 
-    public static void test_makeEmail(){
-        Email mail = new Email();
-        System.out.println(mail.toString());
-        mail.setTo("example@yandex.ru");
-        mail.setFrom("me@mail.ru");
-        mail.setTitle("Test title");
-        mail.setBody("Big body\nBIGGEST BODY!\n(not so big...)\n");
-        System.out.println(mail.toString());
-    }
-
-    public static void test_Mailer_readProps(){
-        try {
-            Mailer mailer = new Mailer("./mailer.properties");
-            System.out.println(mailer.toString());
-        } catch (Exception e){
-            e.printStackTrace();
-        }
-    }
-
     private static void test_send_email(){
         Email mail = new Email();
         mail.setTo("jperelygin@gmail.com");

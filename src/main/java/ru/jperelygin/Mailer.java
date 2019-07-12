@@ -1,15 +1,14 @@
 package ru.jperelygin;
 
+import javax.mail.*;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Date;
 import java.util.Properties;
-
-import java.util.logging.*;
-
-import javax.mail.*;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
+import java.util.logging.LogManager;
+import java.util.logging.Logger;
 
 
 public class Mailer {
@@ -166,26 +165,38 @@ public class Mailer {
             store.connect(this.imapHost, this.login, this.password);
 
             Folder inbox = store.getFolder("INBOX");
-            inbox.open(Folder.READ_ONLY);
-
-            System.out.println("Number of mails : " + inbox.getMessageCount());
-            LOGGER.info("Number of mails : " + inbox.getMessageCount());
-
-            int numberOfMessagesForView = inbox.getMessageCount() + 1; // because they start indexing with 1
-            if (inbox.getMessageCount() > 11){
-                numberOfMessagesForView = 11;
-                LOGGER.info("Number of messages to view : " + numberOfMessagesForView);
-            }
-            for (int i = 1 ; i < numberOfMessagesForView ; i++){
-                Message message = inbox.getMessage(i);
-                System.out.println(String.format("%5s", String.valueOf(message.getMessageNumber())) + "\t" +
-                        String.format("%15s", message.getReceivedDate().toString()) + "\t" +
-                        String.format("%15s", message.getFrom()) + "\t" +
-                        String.format("%20s", message.getSubject()));
-            }
+            printMessages(inbox);
 
         } catch (Exception e){
             LOGGER.warning(e.toString());
         }
+    }
+
+    private void printMessages(Folder folder){
+        try {
+            folder.open(Folder.READ_ONLY);
+
+            System.out.println("Number of mails : " + folder.getMessageCount());
+            LOGGER.info("Number of mails : " + folder.getMessageCount());
+
+            int numberOfMessagesForView = folder.getMessageCount() + 1; // because they start indexing from 1
+            if (folder.getMessageCount() > 11) {
+                numberOfMessagesForView = 11;
+                LOGGER.info("Number of messages to view : " + numberOfMessagesForView);
+            }
+            for (int i = 1; i < numberOfMessagesForView; i++) {
+                Message message = folder.getMessage(i);
+                prettyPrintMail(message);
+            }
+        } catch (Exception e){
+            LOGGER.warning(e.toString());
+        }
+    }
+
+    private void prettyPrintMail(Message message) throws MessagingException{
+        System.out.println(String.format("%5s", String.valueOf(message.getMessageNumber())) + "\t" +
+                String.format("%15s", message.getReceivedDate().toString()) + "\t" +
+                String.format("%15s", message.getFrom()) + "\t" +
+                String.format("%20s", message.getSubject()));
     }
 }
