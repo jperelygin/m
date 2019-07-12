@@ -1,0 +1,5 @@
+Login=login@domain.dmn
+Password=Password
+Host=smtp.domain.dmn
+StartSslPort=587
+SslTlsPort=465
