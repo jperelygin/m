@@ -19,14 +19,14 @@ public class Main {
 
     public static void test_Mailer_readProps(){
         try {
-            Mailer mailer = new Mailer("/Users/ivanperelygin/Desktop/JavaPractice/m/mailer.properties");
+            Mailer mailer = new Mailer("./mailer.properties");
             System.out.println(mailer.toString());
         } catch (Exception e){
             e.printStackTrace();
         }
     }
 
-    public static void test_send_email(){
+    private static void test_send_email(){
         Email mail = new Email();
         mail.setTo("jperelygin@gmail.com");
         mail.setFrom("saint@horsefucker.org");
@@ -36,15 +36,13 @@ public class Main {
         try {
             Mailer mailer = new Mailer("/Users/ivanperelygin/Desktop/JavaPractice/m/mailer_yandex.properties");
             System.out.println(mailer.toString());
-            //mailer.turnAllLogger();
-            mailer.turnInfoLogger();
             mailer.sendEmailSSL(mail);
         } catch (Exception e){
             e.printStackTrace();
         }
     }
 
-    public static void readArg(String arg){
+    private static void readArg(String arg){
         switch (arg){
             case "-h":
                 printHelp();
@@ -58,7 +56,7 @@ public class Main {
         }
     }
 
-    public static void printHelp(){
+    private static void printHelp(){
         System.out.println("-- Help for \"m\"");
         System.out.println("-- use argument \"-t\" to send test mail");
         System.out.println("-- use argument\"-h\" to see this help message");

@@ -15,8 +15,7 @@ import javax.mail.internet.MimeMessage;
 public class Mailer {
 
     private static final Logger LOGGER = Logger.getLogger(Mailer.class.getName());
-    private Handler fileHandler = null;
-    private Formatter formatter = null;
+    private static final LogManager logManager = LogManager.getLogManager();
 
     private String login;
     private String password;
@@ -27,13 +26,7 @@ public class Mailer {
 
     Mailer(String propertiesFilePath) throws IOException {
 
-        // Logger preparations in constructor
-        fileHandler = new FileHandler("./mailer.log");
-        formatter = new SimpleFormatter();
-        fileHandler.setFormatter(formatter);
-        LOGGER.addHandler(fileHandler);
-        LOGGER.setLevel(Level.OFF);         // Both can be turned on \
-        fileHandler.setLevel(Level.OFF);    // by using @turnAllLogger() function
+        readLoggerParams();
 
         Properties prop = new Properties();
         FileInputStream inputStream = new FileInputStream(propertiesFilePath);
@@ -46,14 +39,12 @@ public class Mailer {
         this.sslTlsPort = Integer.parseInt(prop.getProperty("SslTlsPort"));
     }
 
-    public void turnAllLogger(){
-        LOGGER.setLevel(Level.ALL);
-        this.fileHandler.setLevel(Level.ALL);
-    }
-
-    public void turnInfoLogger(){
-        LOGGER.setLevel(Level.INFO);
-        this.fileHandler.setLevel(Level.INFO);
+    private static void readLoggerParams(){
+        try{
+            logManager.readConfiguration(new FileInputStream("./logger.cfg"));
+        }catch (Exception e){
+            LOGGER.warning(e.toString());
+        }
     }
 
     @Override
@@ -66,29 +57,18 @@ public class Mailer {
     }
 
     public void sendEmailViaSMTPwithTLS(Email mail){
-        System.out.println("-- preparing tls propeties");
         Properties prop = new Properties();
-        String password = this.password;
-        String host = this.host;
 
         prop.put("mail.smtp.host", this.host);
-
+        LOGGER.info("Host : " + this.host);
         prop.put("mail.smtp.port", String.valueOf(this.startSslPort));
         LOGGER.info("Sslport : " + this.startSslPort);
-
         prop.put("mail.smtp.auth", "true");
-
         prop.put("mail.smtp.starttls.enable", "true");
 
-        LOGGER.info( "Properties:");
-        prop.forEach((k,v) -> LOGGER.info(k + " : " + v));
+        Authenticator auth = getAuthenticator();
 
-        Authenticator auth = new Authenticator() {
-            @Override
-            protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(host, password);
-            }
-        };
+        logProperties(prop);
 
         Session session = Session.getInstance(prop, auth);
 
@@ -99,36 +79,22 @@ public class Mailer {
             e.printStackTrace();
             LOGGER.info("Exception:" + e);
         }
-
     }
 
-
     public void sendEmailSSL(Email mail){
-
-        LOGGER.info("-- preparing ssl propeties");
         Properties prop = new Properties();
-        String password = this.password;
-        String host = this.host;
 
         prop.put("mail.smtp.host", this.host);
         LOGGER.info( "Host : " + this.host + "\t" + this.host.getClass().getName());
-
         prop.put("mail.smtp.socketFactory.port", String.valueOf(this.sslTlsPort));
         LOGGER.info("Port : " + this.sslTlsPort);
-
         prop.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
         prop.put("mail.smtp.auth", "true");
         prop.put("mail.smtp.port", String.valueOf(this.sslTlsPort));
 
-        Authenticator auth = new Authenticator() {
-            @Override
-            protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(host, password);
-            }
-        };
+        Authenticator auth = getAuthenticator();
 
-        LOGGER.config( "Properties:");
-        prop.forEach((k,v) -> LOGGER.config(k + " : " + v));
+        logProperties(prop);
 
         Session session = Session.getInstance(prop, auth);
 
@@ -137,11 +103,28 @@ public class Mailer {
             sendEmail(session, mail);
             LOGGER.info("-- email sent!");
         } catch (Exception e){
-            e.printStackTrace();
-            LOGGER.warning("Exception: " + e);
+            LOGGER.warning("Exception: " + e.toString());
         }
     }
 
+    private void logProperties(Properties prop){
+        LOGGER.config( "Properties:"); //!
+        prop.forEach((k,v) -> LOGGER.config(k + " : " + v));
+    }
+
+    private Authenticator getAuthenticator(){
+        this.host = host;
+        this.password = password;
+        Authenticator auth = new Authenticator() {
+            @Override
+            protected PasswordAuthentication getPasswordAuthentication() {
+                PasswordAuthentication pwAuth = new PasswordAuthentication(host, password);
+                LOGGER.info(pwAuth.toString());
+                return pwAuth;
+            }
+        };
+        return auth;
+    }
 
     private void sendEmail(Session session, Email mail) throws MessagingException {
         MimeMessage msg = new MimeMessage(session);
