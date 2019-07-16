@@ -1,6 +1,7 @@
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import javax.mail.Authenticator;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Date;
@@ -184,14 +185,14 @@ public class Mailer {
             }
             for (int i = 1; i < numberOfMessagesForView; i++) {
                 Message message = folder.getMessage(i);
-                prettyPrintMail(message);
+                prettyPrintMailList(message);
             }
         } catch (Exception e){
             LOGGER.warning(e.toString());
         }
     }
 
-    private void prettyPrintMail(Message message) throws MessagingException{
+    private void prettyPrintMailList(Message message) throws MessagingException{
         String m = String.format("%5s", String.valueOf(message.getMessageNumber())) + "\t" +
                 String.format("%15s", message.getReceivedDate().toString()) + "\t" +
                 String.format("%15s", message.getFrom()) + "\t" +

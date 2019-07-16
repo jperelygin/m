@@ -8,6 +8,7 @@
     <artifactId>m</artifactId>
     <version>1.0-SNAPSHOT</version>
 
+    <!-- TODO: Add Activation into jar building -->
     <build>
         <plugins>
             <plugin>
@@ -15,6 +16,20 @@
                 <configuration>
                     <source>12</source>
                     <target>12</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.1.0</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addClasspath>true</addClasspath>
+                            <classpathPrefix>lib/</classpathPrefix>
+                            <mainClass>Main</mainClass>
+                        </manifest>
+                    </archive>
                 </configuration>
             </plugin>
         </plugins>
@@ -26,13 +41,6 @@
             <artifactId>mail</artifactId>
             <version>1.4</version>
         </dependency>
-
-        <dependency>
-            <groupId>javax.activation</groupId>
-            <artifactId>activation</artifactId>
-            <version>1.1.1</version>
-        </dependency>
     </dependencies>
-
 
 </project>
